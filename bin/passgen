@@ -1,0 +1,105 @@
+#! /usr/bin/perl
+
+use diagnostics;
+use strict;
+use Getopt::Long;
+
+package DictWord;
+use Carp;
+sub TIEARRAY {
+  use integer;
+  my $class = shift;
+  my $minlength = shift || 1;
+  my $maxlength = shift || 2;
+  my $file = shift || '/usr/share/dict/words';
+  my @words;
+  my %self;
+  
+  $self{count} = 0;
+  $self{data}  = \@words;  
+  open D, '<' . $file or croak "Can't open $file ($!)\n";
+  while (<D>) {
+    chomp;
+    my $len = length;
+    next if $len > $maxlength or $len < $minlength;
+    push @words, $_;
+    $self{count}++;
+  }
+  return bless \%self, $class;
+}
+
+sub FETCHSIZE {
+  my $self = shift;
+  return $self->{count};
+}
+
+sub FETCH {
+  use integer;
+  my $self = shift;
+  my $index = shift;
+  if ($index < 0 or $index >= $self->{count}) {
+    return "";
+  }
+  else {
+    return $self->{data}->[$index];
+  }
+} 
+
+package main;
+
+my $numeric;
+my $maxlen = 1000;
+my $minlen = 1;
+my $overall_length = -1;
+my $dictionary;
+unless (GetOptions('numeric' => \$numeric,
+                   'maxlen=i' => \$maxlen,
+                   'minlen=i' => \$minlen,
+                   'overall-length=i' => \$overall_length,
+                   'dictionary=s' => \$dictionary)) {
+  exit 1;
+}
+if ($overall_length < 0) {
+  $overall_length = 1000;
+  $maxlen = 1000 unless $maxlen > 0;
+  $minlen = 1 unless $minlen > 0;
+  $maxlen = $minlen unless $maxlen >= $minlen;
+  my $bare_minimum = $minlen * 2 + 1;
+  $overall_length = $bare_minimum if $overall_length < $bare_minimum;
+}
+else { # overall-length takes precedence
+  $maxlen = $overall_length - $minlen - 1;
+  $minlen = $overall_length - $maxlen - 1;
+}
+my @word;
+my @pass_word;
+my $i;
+my $howmany = shift || 1;
+my %repeat;
+my $complete_password;
+my @punctuation = qw(! @ $ % ^ & * . / \ - _ | + = ~ `);
+push @punctuation, '#';
+push @punctuation, ',';
+my $separator;
+tie @word, 'DictWord', $minlen, $maxlen, $dictionary;
+# warn "$minlen, $maxlen: $#word\n";
+PASSWORD: while ($howmany) {
+  @pass_word = ();
+  for ($i = 0; $i < 2; ++$i) {
+    push @pass_word, $word[rand @word];
+  }
+  if ($numeric) {
+    $separator = int rand 10;
+  }
+  else {
+    $separator = $punctuation[rand @punctuation];
+  }
+  $complete_password = $pass_word[0] . $separator . $pass_word[1];
+  redo PASSWORD if length($complete_password) > $overall_length;
+  unless ($repeat{$complete_password}) {
+    --$howmany;
+    $repeat{$complete_password}++;
+    print $complete_password, "\n";
+  }
+}
+exit 0;
