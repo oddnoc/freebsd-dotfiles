@@ -87,10 +87,3 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# Interesting pkg queries (from portmaster)
-alias    pkg_roots='pkg query -e "%#d = 0 && %#r = 0" "%o"'
-alias   pkg_trunks='pkg query -e "%#d = 0 && %#r > 0" "%o"'
-alias pkg_branches='pkg query -e "%#d > 0 && %#r > 0" "%o"'
-alias   pkg_leaves='pkg query -e "%#d > 0 && %#r = 0" "%o"'
-alias pkg_origins='(pkg_roots; pkg_leaves)|sort'
