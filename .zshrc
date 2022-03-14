@@ -52,7 +52,7 @@ COMPLETION_WAITING_DOTS="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  z
+  zoxide
   httpie
   git
 )
@@ -87,3 +87,14 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+if [ -f /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then 
+  source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+if [ -f /usr/local/share/examples/fzf/shell/key-bindings.zsh                 ]; then
+  source /usr/local/share/examples/fzf/shell/key-bindings.zsh
+  bindkey "^T" transpose-chars
+fi
+if [ -f /usr/local/share/examples/fzf/shell/completion.zsh                   ];then 
+  source /usr/local/share/examples/fzf/shell/completion.zsh
+fi
